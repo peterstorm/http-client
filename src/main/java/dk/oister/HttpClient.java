@@ -16,6 +16,8 @@ import dk.oister.interfaces.AuthService;
 import dk.oister.interfaces.AuthTokens;
 import dk.oister.interfaces.HttpClientInterface;
 import dk.oister.utils.OptionalTypeAdapter;
+import okhttp3.Headers;
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -27,12 +29,14 @@ public class HttpClient implements HttpClientInterface {
     private final Gson gson;
     private final OkHttpClient client;
     private final String baseUrl;
+    private final String urlScheme;
     private final Optional<AuthTokens> authTokens;
     private final Optional<AuthService> authService;
 
     private HttpClient(Builder builder) {
         this.errorBody = builder.errorBody;
         this.baseUrl = builder.baseUrl;
+        this.urlScheme = builder.urlScheme;
         this.client = builder.client;
         this.gson = builder.gson;
         this.authTokens = builder.authTokens;
@@ -40,10 +44,19 @@ public class HttpClient implements HttpClientInterface {
     }
 
     @Override
-    public <T> T get(String method, Map<String, String> headers, Map<String, String> params, Type type)
-            throws IOException, Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'get'");
+    public <T> T get(String method, Map<String, String> headers, Map<String, String> params, Type type) throws Exception {
+        Headers headersFromMap = Headers.of(headers);
+        Request.Builder request = new Request
+            .Builder()
+            .headers(headersFromMap)
+            .url(buildUrl(method, params))
+            .get();
+        authTokens
+            .ifPresentOrElse(
+                auth -> auth.withAuthToken(token -> request.addHeader("Authorization", "Bearer " + token.token())), 
+                null
+            );
+        return runRequest(request, type);
     }
 
     @Override
@@ -74,6 +87,16 @@ public class HttpClient implements HttpClientInterface {
         throw new UnsupportedOperationException("Unimplemented method 'delete'");
     }
 
+    private HttpUrl buildUrl(String method, Map<String, String> params) {
+        HttpUrl.Builder urlBuilder = new HttpUrl.Builder();
+        urlBuilder.scheme(this.urlScheme);
+        urlBuilder.host(this.baseUrl);
+        urlBuilder.addPathSegments(method);
+        params.forEach((k, v) -> urlBuilder.addQueryParameter(k, v));
+        HttpUrl url = urlBuilder.build();
+        return url;
+    }
+
     private Response checkResponse(Response response, Request request) {
         int responseCode = response.code();
         if (responseCode == 200) {
@@ -88,7 +111,7 @@ public class HttpClient implements HttpClientInterface {
     private <T> T runRequest(Request.Builder requestBuilder, Type type) throws Exception {
         Request request = requestBuilder
                 .build();
-
+        System.out.println(request.toString());
         Response response = client
                 .newCall(request)
                 .execute();
@@ -102,6 +125,7 @@ public class HttpClient implements HttpClientInterface {
 
     public static final class Builder {
         String baseUrl;
+        String urlScheme;
         Type errorBody;
         OkHttpClient client;
         Gson gson;
@@ -111,6 +135,7 @@ public class HttpClient implements HttpClientInterface {
         public Builder(String baseUrl, Type errorBody) {
             this.errorBody = errorBody;
             this.baseUrl = baseUrl;
+            this.urlScheme = "https";
             this.client = new OkHttpClient();
             this.gson = new GsonBuilder()
                 .registerTypeAdapterFactory(OptionalTypeAdapter.FACTORY)
@@ -124,6 +149,11 @@ public class HttpClient implements HttpClientInterface {
             AuthTokens authTokens = new SimpleAuthTokens(authService);
             this.authService = Optional.of(authService);
             this.authTokens = Optional.of(authTokens);
+            return this;
+        }
+
+        public Builder withHttpScheme() {
+            this.urlScheme = "http";
             return this;
         }
 
