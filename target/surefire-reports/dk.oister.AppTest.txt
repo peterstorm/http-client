@@ -1,0 +1,5 @@
+-------------------------------------------------------------------------------
+Test set: dk.oister.AppTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in dk.oister.AppTest
+dk.oister.AppTest.shouldAnswerWithTrue -- Time elapsed: 0.008 s
