@@ -80,7 +80,9 @@ public class HttpClient implements HttpClientInterface {
             return response;
         } else if (responseCode == 201) {
             return response;
-        } else if ()
+        } else {
+            return null;
+        }
     }
 
     private <T> T runRequest(Request.Builder requestBuilder, Type type) throws Exception {

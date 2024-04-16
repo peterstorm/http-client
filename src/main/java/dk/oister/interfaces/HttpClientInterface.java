@@ -1,4 +1,4 @@
-package dk.oister;
+package dk.oister.interfaces;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
