@@ -1,5 +1,12 @@
 package dk.oister.domain.errors;
 
-public sealed interface HttpError<E> permits ConflictErrror, NotAuthorized{
-
-}
+public sealed interface HttpError
+    permits
+        ConflictErrror,
+        Unauthorized,
+        BadRequest,
+        Forbidden,
+        NotFound,
+        InternalServerError,
+        ServiceUnavailable
+    {}

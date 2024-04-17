@@ -21,14 +21,12 @@ public class App
 
         HttpClient client = new HttpClient
             .Builder("dummyapi.online", null)
-            .withSimpleAuth("awefawefawfwf")
             .build();
 
         try {
             ArrayList<Todo> result = client.get("api/todos", Collections.emptyMap(), Collections.emptyMap(), listType);
             System.out.println(result);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
