@@ -9,12 +9,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 
-import dk.oister.domain.errors.Unauthorized;
+import dk.oister.domain.errors.BadRequest;
+import dk.oister.domain.errors.HttpError;
+import dk.oister.domain.errors.NotFound;
 import dk.oister.implementations.SimpleAuthService;
 import dk.oister.implementations.SimpleAuthTokens;
 import dk.oister.interfaces.AuthService;
 import dk.oister.interfaces.AuthTokens;
 import dk.oister.interfaces.HttpClientInterface;
+import dk.oister.util.Either;
+import dk.oister.util.Left;
+import dk.oister.util.Right;
 import dk.oister.utils.OptionalTypeAdapter;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
@@ -25,9 +30,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-public class HttpClient implements HttpClientInterface {
+public class HttpClient<E> implements HttpClientInterface {
 
-    private Type errorBody;
+    private Class<E> errorBody;
     private final Gson gson;
     private final OkHttpClient client;
     private final String baseUrl;
@@ -35,7 +40,7 @@ public class HttpClient implements HttpClientInterface {
     private final String authScheme;
     private final Optional<AuthTokens> authTokens;
 
-    private HttpClient(Builder builder) {
+    private HttpClient(Builder<E> builder) {
         this.errorBody = builder.errorBody;
         this.baseUrl = builder.baseUrl;
         this.urlScheme = builder.urlScheme;
@@ -46,7 +51,7 @@ public class HttpClient implements HttpClientInterface {
     }
 
     @Override
-    public <T> T get(
+    public <T> Either<HttpError, T> get(
         String method, 
         Map<String, String> headers,
         Map<String, String> params, 
@@ -67,7 +72,7 @@ public class HttpClient implements HttpClientInterface {
     }
 
     @Override
-    public <T, U> U post(
+    public <T, U> Either<HttpError, U> post(
         String method, 
         Map<String, 
         String> headers, 
@@ -92,7 +97,7 @@ public class HttpClient implements HttpClientInterface {
     }
 
     @Override
-    public <T, U> U put(
+    public <T, U> Either<HttpError, U> put(
         String method, 
         Map<String, String> headers, 
         Map<String, String> params, 
@@ -116,7 +121,7 @@ public class HttpClient implements HttpClientInterface {
     }
 
     @Override
-    public <U> U putNoBody(
+    public <U> Either<HttpError, U> putNoBody(
         String method, 
         Map<String, String> headers, 
         Map<String, String> params, 
@@ -138,7 +143,7 @@ public class HttpClient implements HttpClientInterface {
     }
 
     @Override
-    public <T> T delete(
+    public <T> Either<HttpError, T> delete(
         String method, 
         Map<String, String> headers, 
         Map<String, String> params, 
@@ -180,45 +185,48 @@ public class HttpClient implements HttpClientInterface {
         return url;
     }
 
-    private Response checkResponse(Response response, Request request) {
+    private Either<HttpError, JsonReader> checkResponse (Response response, Request request) {
         int responseCode = response.code();
-        ResponseBody body = response.body();
+        JsonReader reader = new JsonReader(new InputStreamReader(response.body().byteStream()));
         if (responseCode == 200) {
-            return response;
+            return Either.pure(reader);
         } else if (responseCode == 201) {
-            return response;
-        } else if (responseCode == 400) {
-            return response;
+            return Either.pure(reader);
         } else {
+            E error = gson.fromJson(reader, errorBody);
+            String errorMessage = "Request {{ " +  request.toString() + " }} failed with " + response.code() + " and ";
+            if (responseCode == 400) {
+                return Either.left(new BadRequest<>(errorMessage, error));
+            } else if (responseCode == 404) {
+                return Either.left(new NotFound<>(errorMessage, error));
+            }
             return null;
         }
     }
 
-    private <T> T runRequest(Request.Builder requestBuilder, Type type) throws Exception {
+    private <T> Either<HttpError, T> runRequest(Request.Builder requestBuilder, Type type) throws Exception {
         Request request = requestBuilder
                 .build();
         System.out.println(request);
         Response response = client
                 .newCall(request)
                 .execute();
-
-        ResponseBody body = checkResponse(response, request).body();
-        JsonReader reader = new JsonReader(new InputStreamReader(body.byteStream()));
-
-        return gson.fromJson(reader, type);
+        
+        return checkResponse(response, request)
+            .map(reader -> gson.fromJson(reader, type));
 
     }
 
-    public static final class Builder {
+    public static final class Builder<E> {
         String baseUrl;
         String urlScheme;
         String authScheme;
-        Type errorBody;
+        Class<E> errorBody;
         OkHttpClient client;
         Gson gson;
         Optional<AuthTokens> authTokens;
 
-        public Builder(String baseUrl, Type errorBody) {
+        public Builder(String baseUrl, Class<E> errorBody) {
             this.errorBody = errorBody;
             this.baseUrl = baseUrl;
             this.urlScheme = "https";
@@ -230,30 +238,30 @@ public class HttpClient implements HttpClientInterface {
             this.authTokens = Optional.empty();
         }
 
-        public Builder withSimpleAuth(String apiKey) {
+        public Builder<E> withSimpleAuth(String apiKey) {
             AuthService authService = new SimpleAuthService(apiKey);
             AuthTokens authTokens = new SimpleAuthTokens(authService);
             this.authTokens = Optional.of(authTokens);
             return this;
         }
 
-        public Builder withCustomAuth(AuthTokens authTokens) {
+        public Builder<E> withCustomAuth(AuthTokens authTokens) {
             this.authTokens = Optional.of(authTokens);
             return this;
         }
 
-        public Builder withCustomAuthScheme(String authScheme) {
+        public Builder<E> withCustomAuthScheme(String authScheme) {
             this.authScheme = authScheme;
             return this;
         }
 
-        public Builder withHttpScheme() {
+        public Builder<E> withHttpScheme() {
             this.urlScheme = "http";
             return this;
         }
 
-        public HttpClient build() {
-            return new HttpClient(this);
+        public HttpClient<E> build() {
+            return new HttpClient<E>(this);
         }
     }
 

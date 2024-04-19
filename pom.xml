@@ -6,7 +6,13 @@
 
   <groupId>dk.oister</groupId>
   <artifactId>http-client</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <url>https://maven.pkg.github.com/peterstorm/http-client</url>
+    </repository>
+  </distributionManagement>
 
   <name>http-client</name>
   <!-- FIXME change it to the project's website -->
@@ -45,6 +51,11 @@
 			<artifactId>junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
+    <dependency>
+      <groupId>dk.oister</groupId>
+      <artifactId>either</artifactId>
+      <version>0.1</version>
+    </dependency> 
 		<dependency>
 			<groupId>net.jqwik</groupId>
 			<artifactId>jqwik</artifactId>
@@ -61,6 +72,7 @@
       <artifactId>gson</artifactId>
       <version>2.10.1</version>
     </dependency>
+  
   </dependencies>
 
   <build>
