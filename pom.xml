@@ -6,7 +6,7 @@
 
   <groupId>dk.oister</groupId>
   <artifactId>http-client</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
   <distributionManagement>
     <repository>
       <id>github</id>
@@ -72,6 +72,7 @@
       <artifactId>gson</artifactId>
       <version>2.10.1</version>
     </dependency>
+  
   </dependencies>
 
   <build>
