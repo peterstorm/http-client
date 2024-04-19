@@ -9,7 +9,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 
-import dk.oister.domain.errors.Unauthorized;
 import dk.oister.implementations.SimpleAuthService;
 import dk.oister.implementations.SimpleAuthTokens;
 import dk.oister.interfaces.AuthService;
