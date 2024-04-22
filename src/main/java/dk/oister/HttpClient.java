@@ -10,8 +10,13 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 
 import dk.oister.domain.errors.BadRequest;
+import dk.oister.domain.errors.Conflict;
+import dk.oister.domain.errors.Forbidden;
 import dk.oister.domain.errors.HttpError;
+import dk.oister.domain.errors.InternalServerError;
 import dk.oister.domain.errors.NotFound;
+import dk.oister.domain.errors.ServiceUnavailable;
+import dk.oister.domain.errors.Unauthorized;
 import dk.oister.implementations.SimpleAuthService;
 import dk.oister.implementations.SimpleAuthTokens;
 import dk.oister.interfaces.AuthService;
@@ -197,9 +202,20 @@ public class HttpClient<E> implements HttpClientInterface {
             String errorMessage = "Request {{ " +  request.toString() + " }} failed with " + response.code() + " and ";
             if (responseCode == 400) {
                 return Either.left(new BadRequest<>(errorMessage, error));
+            } else if (responseCode == 401) {
+                return Either.left(new Unauthorized<>(errorMessage, error));
+            } else if (responseCode == 403) {
+                return Either.left(new Forbidden<>(errorMessage, error));
             } else if (responseCode == 404) {
                 return Either.left(new NotFound<>(errorMessage, error));
+            } else if (responseCode == 409) {
+                return Either.left(new Conflict<>(errorMessage, error));
+            } else if (responseCode == 500) {
+                return Either.left(new InternalServerError<>(errorMessage, error));
+            } else if (responseCode == 503) {
+                return Either.left(new ServiceUnavailable<>(errorMessage, error));
             }
+            System.err.println("UNHANDLED HTTP ERROR, ADD IT IN THE LIBRARY" + responseCode);
             return null;
         }
     }

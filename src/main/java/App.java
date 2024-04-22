@@ -28,7 +28,7 @@ public class App
             .build();
 
         try {
-            Either<HttpError, ArrayList<Todo>> result = client.get("api/todos", Collections.emptyMap(), Collections.emptyMap(), listType);
+            Either<HttpError, ArrayList<Todo>> result = client.get("api/todos/awefawef", Collections.emptyMap(), Collections.emptyMap(), listType);
             System.out.println(result);
         } catch (Exception e) {
             e.printStackTrace();

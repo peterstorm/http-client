@@ -2,7 +2,7 @@ package dk.oister.domain.errors;
 
 public sealed interface HttpError
     permits
-        ConflictErrror,
+        Conflict,
         Unauthorized,
         BadRequest,
         Forbidden,
