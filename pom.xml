@@ -13,6 +13,12 @@
       <url>https://maven.pkg.github.com/peterstorm/http-client</url>
     </repository>
   </distributionManagement>
+  <repositories>
+    <repository>
+      <id>github-maven</id>
+      <url>https://maven.pkg.github.com/peterstorm/*</url>
+    </repository>
+  </repositories>
 
   <name>http-client</name>
   <!-- FIXME change it to the project's website -->
