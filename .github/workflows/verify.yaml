@@ -23,4 +23,9 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
+      permissions:
+        contents: read
+        packages: read
       run: mvn verify
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
