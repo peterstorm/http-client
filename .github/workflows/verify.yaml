@@ -28,6 +28,6 @@ jobs:
           [{
             "id": "oisterMaven",
             "username": "oister",
-            "password": "${{ secrets.AZURE_MAVEN }}"
+            "password": "${{ secrets.AZURE_PAT_TOKEN }}"
           }]
     - run: mvn verify
