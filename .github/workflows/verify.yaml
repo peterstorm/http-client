@@ -22,8 +22,8 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
-    - name: Build with Maven
-      uses: s4u/maven-settings-action@v2.8.0
+    - uses: s4u/maven-settings-action@v2.8.0
       with:
         servers: ${{ secrets.AZURE_MAVEN }}
-    - run: cat /home/runner/.m2/settings.xml
+        githubServer: false
+    - run: mvn verify
