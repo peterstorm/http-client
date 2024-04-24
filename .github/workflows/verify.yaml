@@ -24,5 +24,10 @@ jobs:
         cache: maven
     - uses: s4u/maven-settings-action@v2.8.0
       with:
-        servers: ${{ secrets.AZURE_MAVEN}}
+        servers: |
+          [{
+            "id": "oisterMaven",
+            "username": "oister",
+            "password": "${{ secrets.AZURE_MAVEN }}"
+          }]
     - run: mvn verify
