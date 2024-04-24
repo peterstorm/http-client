@@ -22,10 +22,7 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
-    - name: rm default settings xml
-      run: rm /home/runner/.m2/settings.xml
-    - uses: s4u/maven-settings-action@v3.0.0
+    - uses: s4u/maven-settings-action@v2.8.0
       with:
-        servers: ${{ secrets.AZURE_MAVEN }}
-        repositories: '[{"id":"oisterMaven","url":"https://pkgs.dev.azure.com/oister/oister/_packaging/oisterMaven/maven/v1"}]'
+        servers: ${{ secrets.AZURE_MAVEN}}
     - run: mvn verify
