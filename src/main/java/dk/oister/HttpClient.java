@@ -23,8 +23,6 @@ import dk.oister.interfaces.AuthService;
 import dk.oister.interfaces.AuthTokens;
 import dk.oister.interfaces.HttpClientInterface;
 import dk.oister.util.Either;
-import dk.oister.util.Left;
-import dk.oister.util.Right;
 import dk.oister.utils.OptionalTypeAdapter;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
@@ -33,11 +31,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 public class HttpClient<E> implements HttpClientInterface {
 
-    private Class<E> errorBody;
+    private final Class<E> errorBody;
     private final Gson gson;
     private final OkHttpClient client;
     private final String baseUrl;
@@ -199,7 +196,7 @@ public class HttpClient<E> implements HttpClientInterface {
             return Either.pure(reader);
         } else {
             E error = gson.fromJson(reader, errorBody);
-            String errorMessage = "Request {{ " +  request.toString() + " }} failed with " + response.code() + " and ";
+            String errorMessage = "Request {{ " +  request.toString() + " }} failed with " + response.code() + " and";
             if (responseCode == 400) {
                 return Either.left(new BadRequest<>(errorMessage, error));
             } else if (responseCode == 401) {
@@ -215,7 +212,7 @@ public class HttpClient<E> implements HttpClientInterface {
             } else if (responseCode == 503) {
                 return Either.left(new ServiceUnavailable<>(errorMessage, error));
             }
-            System.err.println("UNHANDLED HTTP ERROR, ADD IT IN THE LIBRARY" + responseCode);
+            System.err.println("UNHANDLED HTTP ERROR, ADD IT IN THE LIBRARY, with " + responseCode + " and " + errorMessage);
             return null;
         }
     }
