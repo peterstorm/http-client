@@ -27,5 +27,5 @@ jobs:
     - uses: s4u/maven-settings-action@v2.8.0
       with:
         servers: ${{ secrets.AZURE_MAVEN }}
-        githubServer: false
+        repositories: '[{"id":"oisterMaven","url":"https://pkgs.dev.azure.com/oister/oister/_packaging/oisterMaven/maven/v1"}]'
     - run: mvn verify
