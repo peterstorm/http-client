@@ -26,4 +26,4 @@ jobs:
       uses: s4u/maven-settings-action@v2.8.0
       with:
         servers: ${{ secrets.AZURE_MAVEN }}
-    - run: mvn install
+    - run: mvn verify
