@@ -25,5 +25,5 @@ jobs:
     - name: Build with Maven
       uses: s4u/maven-settings-action@v2.8.0
       with:
-        servers: ${{ secrets.AZURE_MAVEN}}
+        servers: ${{ secrets.AZURE_MAVEN }}
     - run: mvn verify
