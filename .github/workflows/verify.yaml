@@ -22,6 +22,8 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
+    - name: rm default settings xml
+      run: rm /home/runner/.m2/settings.xml
     - uses: s4u/maven-settings-action@v2.8.0
       with:
         servers: ${{ secrets.AZURE_MAVEN }}
