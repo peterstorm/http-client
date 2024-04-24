@@ -1,7 +1,9 @@
 package dk.oister.implementations;
 
 import dk.oister.domain.authentication.AuthToken;
+import dk.oister.domain.errors.HttpError;
 import dk.oister.interfaces.AuthService;
+import dk.oister.util.Either;
 
 public class SimpleAuthService implements AuthService {
 
@@ -12,8 +14,8 @@ public class SimpleAuthService implements AuthService {
     }
 
     @Override
-    public AuthToken renewAuthToken() {
-        return new AuthToken(this.apiKey);
+    public Either<HttpError, AuthToken> renewAuthToken() {
+        return Either.pure(new AuthToken(this.apiKey));
     }
 
     @Override

@@ -25,6 +25,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: publish package
-      run: mvn clean deploy -Dmaven.test.skip=true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: s4u/maven-settings-action@v2.8.0
+      with:
+        servers: ${{ secrets.AZURE_MAVEN}}
+    - run: mvn clean deploy -Dmaven.test.skip=true
