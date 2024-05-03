@@ -14,6 +14,9 @@ import dk.oister.util.Either;
  */
 public class App 
 {
+    static String toUpperCase(String s) {
+        return s.toUpperCase();
+    }
     public static void main( String[] args )
     {
         record Todo(int id, String todo, Boolean completed, int userId) {};
