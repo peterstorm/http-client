@@ -8,5 +8,7 @@ public sealed interface HttpError
         Forbidden,
         NotFound,
         InternalServerError,
-        ServiceUnavailable
+        ServiceUnavailable,
+        UnhandledError,
+        UnknownError
     {}

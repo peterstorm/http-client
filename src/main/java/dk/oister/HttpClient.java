@@ -1,5 +1,6 @@
 package dk.oister;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -17,6 +18,8 @@ import dk.oister.domain.errors.InternalServerError;
 import dk.oister.domain.errors.NotFound;
 import dk.oister.domain.errors.ServiceUnavailable;
 import dk.oister.domain.errors.Unauthorized;
+import dk.oister.domain.errors.UnhandledError;
+import dk.oister.domain.errors.UnknownError;
 import dk.oister.implementations.SimpleAuthService;
 import dk.oister.implementations.SimpleAuthTokens;
 import dk.oister.interfaces.AuthService;
@@ -58,7 +61,7 @@ public class HttpClient<E> implements HttpClientInterface {
         Map<String, String> headers,
         Map<String, String> params, 
         Type type
-    ) throws Exception {
+    ) {
 
         Headers headersFromMap = Headers.of(headers);
         Request.Builder request = new Request
@@ -82,7 +85,7 @@ public class HttpClient<E> implements HttpClientInterface {
         T data, 
         Type postType,
         Type returnType
-    ) throws Exception {
+    ) {
 
         Headers headersFromMap = Headers.of(headers);
         String body = gson.toJson(data, postType);
@@ -106,7 +109,7 @@ public class HttpClient<E> implements HttpClientInterface {
         T data, 
         Type postType,
         Type returnType
-    ) throws Exception {
+    ) {
 
         Headers headersFromMap = Headers.of(headers);
         String body = gson.toJson(data, postType);
@@ -128,7 +131,7 @@ public class HttpClient<E> implements HttpClientInterface {
         Map<String, String> headers, 
         Map<String, String> params, 
         Type returnType
-    ) throws Exception {
+    ) {
 
         Headers headersFromMap = Headers.of(headers);
         String body = gson.toJson("");
@@ -150,7 +153,7 @@ public class HttpClient<E> implements HttpClientInterface {
         Map<String, String> headers, 
         Map<String, String> params, 
         Type type
-    ) throws Exception {
+    ) {
 
         Headers headersFromMap = Headers.of(headers);
         Request.Builder request = new Request
@@ -212,23 +215,34 @@ public class HttpClient<E> implements HttpClientInterface {
             } else if (responseCode == 503) {
                 return Either.left(new ServiceUnavailable<>(errorMessage, error));
             }
-            System.err.println("UNHANDLED HTTP ERROR, ADD IT IN THE LIBRARY, with " + responseCode + " and " + errorMessage);
-            return null;
+            String errorString = "UNHANDLED HTTP ERROR, ADD IT IN THE LIBRARY, with " + responseCode + " and " + errorMessage;
+            return Either.left(new UnhandledError<E>(errorString, error));
         }
     }
 
-    private <T> Either<HttpError, T> runRequest(Request.Builder requestBuilder, Type type) throws Exception {
+    private <T> Either<HttpError, T> runRequest(Request.Builder requestBuilder, Type type) {
         Request request = requestBuilder
                 .build();
-        System.out.println(request);
-        Response response = client
-                .newCall(request)
-                .execute();
+
+        Either<HttpError, Response> eitherResponse = null;
+
+        try {
+            eitherResponse = Either.right(client
+                    .newCall(request)
+                    .execute()
+            );
+        } catch (IOException e) {
+            eitherResponse = Either
+                .left(new UnknownError(e.toString()));
+        }
         
-        return checkResponse(response, request)
-            .map(reader -> gson.fromJson(reader, type));
+        return eitherResponse.flatMap(resp -> 
+            checkResponse(resp, request)
+                .map(reader -> gson.fromJson(reader, type))
+        );
 
     }
+
 
     public static final class Builder<E> {
         String baseUrl;
