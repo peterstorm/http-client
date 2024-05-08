@@ -224,19 +224,20 @@ public class HttpClient<E> implements HttpClientInterface {
         Request request = requestBuilder
                 .build();
 
-        Either<HttpError, Response> eitherResponse = null;
+        Either<HttpError, Response> responseOrError = null;
 
         try {
-            eitherResponse = Either.right(client
-                    .newCall(request)
-                    .execute()
+            responseOrError = Either
+                .right(client
+                .newCall(request)
+                .execute()
             );
         } catch (IOException e) {
-            eitherResponse = Either
+            responseOrError = Either
                 .left(new UnknownError(e.toString()));
         }
         
-        return eitherResponse.flatMap(resp -> 
+        return responseOrError.flatMap(resp -> 
             checkResponse(resp, request)
                 .map(reader -> gson.fromJson(reader, type))
         );
