@@ -30,14 +30,13 @@ public class SimpleAuthClient<T, E> implements AuthClient<T> {
     public Either<HttpError, AuthToken> renewAuthToken(T credentials) {
         return client
             .post(
-                this.method, 
+                this.method,
                 headers,
-                Collections.emptyMap(), 
-                credentials, 
-                credentials.getClass(), 
+                Collections.emptyMap(),
+                credentials,
+                credentials.getClass(),
                 AuthToken.class
             );
     }
-
 
 }

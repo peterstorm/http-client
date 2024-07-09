@@ -31,14 +31,14 @@ public class App
                 Error.class
             );
 
-          Either<HttpError, List<Todo>> result = 
-              client.get(
-                  "todos",
-                  Collections.emptyMap(),
-                  Collections.emptyMap(),
-                  Todos.class
-              );
-          System.out.println(authService.renewAuthToken());
-          System.out.println(result);
+        Either<HttpError, List<Todo>> result = 
+            client.get(
+                "todos",
+                Collections.emptyMap(),
+                Collections.emptyMap(),
+                Todos.class
+            );
+        System.out.println(authService.renewAuthToken());
+        System.out.println(result);
     }
 }
