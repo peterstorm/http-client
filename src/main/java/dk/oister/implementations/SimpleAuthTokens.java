@@ -6,7 +6,7 @@ import dk.oister.interfaces.AuthTokens;
 import dk.oister.interfaces.ThrowingLambda;
 
 public class SimpleAuthTokens implements AuthTokens {
-    
+
     private AuthService authService;
 
     public SimpleAuthTokens(AuthService authService) {
