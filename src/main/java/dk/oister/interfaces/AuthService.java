@@ -6,7 +6,7 @@ import dk.oister.util.Either;
 
 public interface AuthService {
 
-    public Either<HttpError, AuthToken> renewAuthToken() throws Exception;
+    public Either<HttpError, AuthToken> renewAuthToken();
 
     public AuthToken retrieveAuthToken();
 

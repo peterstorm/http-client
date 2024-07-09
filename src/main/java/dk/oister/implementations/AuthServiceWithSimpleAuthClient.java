@@ -27,9 +27,8 @@ public class AuthServiceWithSimpleAuthClient<T, E> implements AuthService {
     }
 
     @Override
-    public Either<HttpError, AuthToken> renewAuthToken() throws Exception {
+    public Either<HttpError, AuthToken> renewAuthToken() {
         return authClient.renewAuthToken(credentials);
-
     }
 
     @Override
