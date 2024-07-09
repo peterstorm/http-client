@@ -11,6 +11,7 @@
         "x86_64-linux"
         "aarch64-darwin"
       ];
+
       perSystem = { pkgs, config, system, ... }: let
       javaVersion = pkgs.jdk21_headless;
       in {
