@@ -8,11 +8,7 @@ import dk.oister.domain.errors.HttpError;
 import dk.oister.implementations.AuthServiceWithSimpleAuthClient;
 import dk.oister.util.Either;
 
-/**
- * Hello world!
- *
- */
-public class App 
+public class App
 {
     public static void main( String[] args )
     {
@@ -35,18 +31,14 @@ public class App
                 Error.class
             );
 
-        try {
-            Either<HttpError, List<Todo>> result = 
-                client.get(
-                    "todos",
-                    Collections.emptyMap(),
-                    Collections.emptyMap(),
-                    Todos.class
-                );
-            System.out.println(authService.renewAuthToken());
-            System.out.println(result);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+          Either<HttpError, List<Todo>> result = 
+              client.get(
+                  "todos",
+                  Collections.emptyMap(),
+                  Collections.emptyMap(),
+                  Todos.class
+              );
+          System.out.println(authService.renewAuthToken());
+          System.out.println(result);
     }
 }

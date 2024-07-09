@@ -1,6 +1,5 @@
 package dk.oister;
 
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -57,9 +56,9 @@ public class HttpClient<E> implements HttpClientInterface {
 
     @Override
     public <T> Either<HttpError, T> get(
-        String method, 
+        String method,
         Map<String, String> headers,
-        Map<String, String> params, 
+        Map<String, String> params,
         Type type
     ) {
 
@@ -78,11 +77,11 @@ public class HttpClient<E> implements HttpClientInterface {
 
     @Override
     public <T, U> Either<HttpError, U> post(
-        String method, 
-        Map<String, 
-        String> headers, 
-        Map<String, String> params, 
-        T data, 
+        String method,
+        Map<String,
+        String> headers,
+        Map<String, String> params,
+        T data,
         Type postType,
         Type returnType
     ) {
@@ -96,7 +95,7 @@ public class HttpClient<E> implements HttpClientInterface {
             .post(RequestBody.create(body, MediaType.parse("application/json")));
 
         return runRequest(
-            addAuthTokenIfPresent(request, authTokens, authScheme), 
+            addAuthTokenIfPresent(request, authTokens, authScheme),
             returnType
         );
     }
@@ -162,7 +161,7 @@ public class HttpClient<E> implements HttpClientInterface {
             .url(buildUrl(method, params))
             .delete();
         return runRequest(
-            addAuthTokenIfPresent(request, authTokens, authScheme), 
+            addAuthTokenIfPresent(request, authTokens, authScheme),
             type
         );
     }
@@ -238,7 +237,6 @@ public class HttpClient<E> implements HttpClientInterface {
 
     }
 
-
     public static final class Builder<E> {
         String baseUrl;
         String urlScheme;
@@ -286,6 +284,5 @@ public class HttpClient<E> implements HttpClientInterface {
             return new HttpClient<E>(this);
         }
     }
-
 
 }
