@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ verify ]
     permissions:
-      contents: read
+      contents: write
       packages: write
     if: ${{ contains(fromJSON('["refs/heads/release", "refs/heads/snapshot"]'), github.ref) }}
     steps:
