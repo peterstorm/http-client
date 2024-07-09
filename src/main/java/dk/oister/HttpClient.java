@@ -69,7 +69,7 @@ public class HttpClient<E> implements HttpClientInterface {
             .headers(headersFromMap)
             .url(buildUrl(method, params))
             .get();
-        
+
         return runRequest(
             addAuthTokenIfPresent(request, authTokens, authScheme), 
             type
@@ -94,7 +94,7 @@ public class HttpClient<E> implements HttpClientInterface {
             .headers(headersFromMap)
             .url(buildUrl(method, params))
             .post(RequestBody.create(body, MediaType.parse("application/json")));
-        
+
         return runRequest(
             addAuthTokenIfPresent(request, authTokens, authScheme), 
             returnType
@@ -149,9 +149,9 @@ public class HttpClient<E> implements HttpClientInterface {
 
     @Override
     public <T> Either<HttpError, T> delete(
-        String method, 
-        Map<String, String> headers, 
-        Map<String, String> params, 
+        String method,
+        Map<String, String> headers,
+        Map<String, String> params,
         Type type
     ) {
 
@@ -224,20 +224,14 @@ public class HttpClient<E> implements HttpClientInterface {
         Request request = requestBuilder
                 .build();
 
-        Either<HttpError, Response> responseOrError = null;
+        Either<HttpError, Response> responseOr = Either
+          .fromTryCatch(
+              () -> client.newCall(request).execute(),
+              e -> new UnknownError(e.toString())
+          );
 
-        try {
-            responseOrError = Either
-                .right(client
-                .newCall(request)
-                .execute()
-            );
-        } catch (IOException e) {
-            responseOrError = Either
-                .left(new UnknownError(e.toString()));
-        }
-        
-        return responseOrError.flatMap(resp -> 
+        return responseOr
+          .flatMap(resp ->
             checkResponse(resp, request)
                 .map(reader -> gson.fromJson(reader, type))
         );
