@@ -281,7 +281,7 @@ public class HttpClient<E> implements HttpClientInterface {
                 credentials,
                 error
             );
-            AuthTokens authTokens = new AuthTokensWithRetry<>(authService);
+            AuthTokens authTokens = new AuthTokensWithRetry(authService);
             this.authTokens = authTokens;
             return this;
 

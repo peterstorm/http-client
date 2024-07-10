@@ -1,5 +1,4 @@
-
-
+import java.lang.Runtime.Version;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,5 +44,7 @@ public class App
             );
         System.out.println(result);
         System.out.println(auth);
+        Version javaVersion = Runtime.version();
+        System.out.println(javaVersion);
     }
 }

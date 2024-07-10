@@ -12,7 +12,7 @@ import dk.oister.util.Either;
 import dk.oister.util.Left;
 import dk.oister.util.Right;
 
-public class AuthTokensWithRetry<E> implements AuthTokens {
+public class AuthTokensWithRetry implements AuthTokens {
 
     private AuthService authService;
 
@@ -30,11 +30,11 @@ public class AuthTokensWithRetry<E> implements AuthTokens {
 
         return switch (either) {
             case Left(HttpError error) -> switch (error) {
-                case Unauthorized(String message, E errorBody) ->
+                case Unauthorized(String message, var unused) ->
                     authService
                         .renewAuthToken()
                         .flatMap(token -> retry(function.apply(token), 0, message));
-                case Forbidden(String message, E errorBody) ->
+                case Forbidden(String message, var unused) ->
                     authService
                         .renewAuthToken()
                         .flatMap(token -> retry(function.apply(token), 0, message));
@@ -55,9 +55,9 @@ public class AuthTokensWithRetry<E> implements AuthTokens {
         } else {
             return switch (either) {
                 case Left(HttpError error) -> switch (error) {
-                    case Unauthorized(String message, E errorBody) ->
+                    case Unauthorized(String message,  var unused) ->
                         retry(either, retries + 1, error.toString());
-                    case Forbidden(String message, E errorBody) ->
+                    case Forbidden(String message, var unused) ->
                         retry(either, retries + 1, error.toString());
                     default -> Either.left(error);
                 };
