@@ -10,5 +10,6 @@ public sealed interface HttpError
         InternalServerError,
         ServiceUnavailable,
         UnhandledError,
-        UnknownError
+        UnknownError,
+        RetryError
     {}

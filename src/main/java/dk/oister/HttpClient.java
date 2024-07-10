@@ -3,7 +3,6 @@ package dk.oister;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.Map;
-import java.util.Optional;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -19,6 +18,8 @@ import dk.oister.domain.errors.ServiceUnavailable;
 import dk.oister.domain.errors.Unauthorized;
 import dk.oister.domain.errors.UnhandledError;
 import dk.oister.domain.errors.UnknownError;
+import dk.oister.implementations.AuthServiceWithSimpleAuthClient;
+import dk.oister.implementations.AuthTokensWithRetry;
 import dk.oister.implementations.SimpleAuthService;
 import dk.oister.implementations.SimpleAuthTokens;
 import dk.oister.interfaces.AuthService;
@@ -42,9 +43,9 @@ public class HttpClient<E> implements HttpClientInterface {
     private final String baseUrl;
     private final String urlScheme;
     private final String authScheme;
-    private final Optional<AuthTokens> authTokens;
+    private final AuthTokens authTokens;
 
-    private HttpClient(Builder<E> builder) {
+    private <U> HttpClient(Builder<U, E> builder) {
         this.errorBody = builder.errorBody;
         this.baseUrl = builder.baseUrl;
         this.urlScheme = builder.urlScheme;
@@ -61,18 +62,17 @@ public class HttpClient<E> implements HttpClientInterface {
         Map<String, String> params,
         Type type
     ) {
+        return authTokens.withAuthToken(token -> {
+            Headers headersFromMap = Headers.of(headers);
+            Request.Builder request = new Request
+                .Builder()
+                .headers(headersFromMap)
+                .addHeader("Authorization", authScheme + " " + token.token())
+                .url(buildUrl(method, params))
+                .get();
 
-        Headers headersFromMap = Headers.of(headers);
-        Request.Builder request = new Request
-            .Builder()
-            .headers(headersFromMap)
-            .url(buildUrl(method, params))
-            .get();
-
-        return runRequest(
-            addAuthTokenIfPresent(request, authTokens, authScheme), 
-            type
-        );
+            return runRequest(request, type);
+        });
     }
 
     @Override
@@ -85,65 +85,62 @@ public class HttpClient<E> implements HttpClientInterface {
         Type postType,
         Type returnType
     ) {
+        return authTokens.withAuthToken(token -> {
+            Headers headersFromMap = Headers.of(headers);
+            String body = gson.toJson(data, postType);
+            Request.Builder request = new Request
+                .Builder()
+                .headers(headersFromMap)
+                .addHeader("Authorization", authScheme + " " + token.token())
+                .url(buildUrl(method, params))
+                .post(RequestBody.create(body, MediaType.parse("application/json")));
 
-        Headers headersFromMap = Headers.of(headers);
-        String body = gson.toJson(data, postType);
-        Request.Builder request = new Request
-            .Builder()
-            .headers(headersFromMap)
-            .url(buildUrl(method, params))
-            .post(RequestBody.create(body, MediaType.parse("application/json")));
-
-        return runRequest(
-            addAuthTokenIfPresent(request, authTokens, authScheme),
-            returnType
-        );
+            return runRequest(request, returnType);
+        });
     }
 
     @Override
     public <T, U> Either<HttpError, U> put(
-        String method, 
-        Map<String, String> headers, 
-        Map<String, String> params, 
-        T data, 
+        String method,
+        Map<String, String> headers,
+        Map<String, String> params,
+        T data,
         Type postType,
         Type returnType
     ) {
+        return authTokens.withAuthToken(token -> {
+            Headers headersFromMap = Headers.of(headers);
+            String body = gson.toJson(data, postType);
+            Request.Builder request = new Request
+                .Builder()
+                .headers(headersFromMap)
+                .addHeader("Authorization", authScheme + " " + token.token())
+                .url(buildUrl(method, params))
+                .put(RequestBody.create(body, MediaType.parse("application/json")));
 
-        Headers headersFromMap = Headers.of(headers);
-        String body = gson.toJson(data, postType);
-        Request.Builder request = new Request
-            .Builder()
-            .headers(headersFromMap)
-            .url(buildUrl(method, params))
-            .put(RequestBody.create(body, MediaType.parse("application/json")));
-
-        return runRequest(
-            addAuthTokenIfPresent(request, authTokens, authScheme), 
-            returnType
-        );
+            return runRequest(request, returnType);
+        });
     }
 
     @Override
     public <U> Either<HttpError, U> putNoBody(
-        String method, 
-        Map<String, String> headers, 
+        String method,
+        Map<String, String> headers,
         Map<String, String> params, 
         Type returnType
     ) {
+        return authTokens.withAuthToken(token -> {
+            Headers headersFromMap = Headers.of(headers);
+            String body = gson.toJson("");
+            Request.Builder request = new Request.Builder()
+                .headers(headersFromMap)
+                .addHeader("Content-Length", "0")
+                .addHeader("Authorization", authScheme + " " + token.token())
+                .url(buildUrl(method, params))
+                .put(RequestBody.create(body, MediaType.parse("application/json")));
 
-        Headers headersFromMap = Headers.of(headers);
-        String body = gson.toJson("");
-        Request.Builder request = new Request.Builder()
-            .headers(headersFromMap)
-            .addHeader("Content-Length", "0")
-            .url(buildUrl(method, params))
-            .put(RequestBody.create(body, MediaType.parse("application/json")));
-
-        return runRequest(
-            addAuthTokenIfPresent(request, authTokens, authScheme), 
-            returnType
-        );
+            return runRequest(request, returnType);
+        });
     }
 
     @Override
@@ -153,30 +150,37 @@ public class HttpClient<E> implements HttpClientInterface {
         Map<String, String> params,
         Type type
     ) {
+        return authTokens.withAuthToken(token -> {
+            Headers headersFromMap = Headers.of(headers);
+            Request.Builder request = new Request
+                .Builder()
+                .headers(headersFromMap)
+                .addHeader("Authorization", authScheme + " " + token.token())
+                .url(buildUrl(method, params))
+                .delete();
+            return runRequest(request, type);
+        });
+            }
 
-        Headers headersFromMap = Headers.of(headers);
-        Request.Builder request = new Request
-            .Builder()
-            .headers(headersFromMap)
-            .url(buildUrl(method, params))
-            .delete();
-        return runRequest(
-            addAuthTokenIfPresent(request, authTokens, authScheme),
-            type
-        );
-    }
-
-    private Request.Builder addAuthTokenIfPresent(
-        Request.Builder request,
-        Optional<AuthTokens> authTokens,
-        String authScheme
+    private <T> Either<HttpError, T> runRequest(
+        Request.Builder requestBuilder,
+        Type type
     ) {
-        Request.Builder req = request;
-        authTokens
-            .ifPresent(
-                auth -> auth.withAuthToken(token -> req.addHeader("Authorization", authScheme + " " + token.token()))
+        Request request = requestBuilder
+            .build();
+
+        Either<HttpError, Response> responseOr = Either
+            .fromTryCatch(
+                () -> client.newCall(request).execute(),
+                e -> new UnknownError(e.toString())
             );
-        return req;
+
+        return responseOr
+            .flatMap(resp ->
+                checkResponse(resp, request)
+                .map(reader -> gson.fromJson(reader, type))
+            );
+
     }
 
     private HttpUrl buildUrl(String method, Map<String, String> params) {
@@ -191,14 +195,23 @@ public class HttpClient<E> implements HttpClientInterface {
 
     private Either<HttpError, JsonReader> checkResponse (Response response, Request request) {
         int responseCode = response.code();
-        JsonReader reader = new JsonReader(new InputStreamReader(response.body().byteStream()));
+        JsonReader reader = new JsonReader(
+            new InputStreamReader(response.body().byteStream())
+        );
+
         if (responseCode == 200) {
             return Either.pure(reader);
         } else if (responseCode == 201) {
             return Either.pure(reader);
         } else {
             E error = gson.fromJson(reader, errorBody);
-            String errorMessage = "Request {{ " +  request.toString() + " }} failed with " + response.code() + " and";
+            String errorMessage
+                = "Request {{ "
+                +  request.toString()
+                + " }} failed with "
+                + response.code()
+                + " and";
+
             if (responseCode == 400) {
                 return Either.left(new BadRequest<>(errorMessage, error));
             } else if (responseCode == 401) {
@@ -214,37 +227,25 @@ public class HttpClient<E> implements HttpClientInterface {
             } else if (responseCode == 503) {
                 return Either.left(new ServiceUnavailable<>(errorMessage, error));
             }
-            String errorString = "UNHANDLED HTTP ERROR, ADD IT IN THE LIBRARY, with " + responseCode + " and " + errorMessage;
+
+            String errorString
+                = "UNHANDLED HTTP ERROR, ADD IT IN THE LIBRARY, with "
+                + responseCode
+                + " and "
+                + errorMessage;
+
             return Either.left(new UnhandledError<E>(errorString, error));
         }
     }
 
-    private <T> Either<HttpError, T> runRequest(Request.Builder requestBuilder, Type type) {
-        Request request = requestBuilder
-                .build();
-
-        Either<HttpError, Response> responseOr = Either
-          .fromTryCatch(
-              () -> client.newCall(request).execute(),
-              e -> new UnknownError(e.toString())
-          );
-
-        return responseOr
-          .flatMap(resp ->
-            checkResponse(resp, request)
-                .map(reader -> gson.fromJson(reader, type))
-        );
-
-    }
-
-    public static final class Builder<E> {
+    public static final class Builder<U, E> {
         String baseUrl;
         String urlScheme;
         String authScheme;
         Class<E> errorBody;
         OkHttpClient client;
         Gson gson;
-        Optional<AuthTokens> authTokens;
+        AuthTokens authTokens;
 
         public Builder(String baseUrl, Class<E> errorBody) {
             this.errorBody = errorBody;
@@ -255,34 +256,57 @@ public class HttpClient<E> implements HttpClientInterface {
             this.gson = new GsonBuilder()
                 .registerTypeAdapterFactory(OptionalTypeAdapter.FACTORY)
                 .create();
-            this.authTokens = Optional.empty();
+            this.authTokens = null;
         }
 
-        public Builder<E> withSimpleAuth(String apiKey) {
+        public Builder<U, E> withSimpleAuth(String apiKey) {
             AuthService authService = new SimpleAuthService(apiKey);
             AuthTokens authTokens = new SimpleAuthTokens(authService);
-            this.authTokens = Optional.of(authTokens);
+            this.authTokens = authTokens;
             return this;
         }
 
-        public Builder<E> withCustomAuth(AuthTokens authTokens) {
-            this.authTokens = Optional.of(authTokens);
+        public Builder<U, E> withRetryAuth(
+            String authBaseUrl,
+            String method,
+            Map<String, String> headers,
+            U credentials,
+            Class<E> error
+
+        ) {
+            AuthService authService = new AuthServiceWithSimpleAuthClient<>(
+                authBaseUrl,
+                method,
+                headers,
+                credentials,
+                error
+            );
+            AuthTokens authTokens = new AuthTokensWithRetry<>(authService);
+            this.authTokens = authTokens;
+            return this;
+
+        }
+
+        public Builder<U, E> withCustomAuth(AuthTokens authTokens) {
+            this.authTokens = authTokens;
             return this;
         }
 
-        public Builder<E> withCustomAuthScheme(String authScheme) {
+        public Builder<U, E> withCustomAuthScheme(String authScheme) {
             this.authScheme = authScheme;
             return this;
         }
 
-        public Builder<E> withHttpScheme() {
+        public Builder<U, E> withHttpScheme() {
             this.urlScheme = "http";
             return this;
         }
 
         public HttpClient<E> build() {
+
             return new HttpClient<E>(this);
         }
     }
+
 
 }

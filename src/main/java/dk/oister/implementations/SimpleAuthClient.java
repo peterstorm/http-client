@@ -21,7 +21,9 @@ public class SimpleAuthClient<T, E> implements AuthClient<T> {
         Map<String, String> headers,
         Class<E> error
     ) {
-        this.client = new HttpClient.Builder<E>(baseUrl, error).build();
+        this.client = new HttpClient.Builder<T, E>(baseUrl, error)
+          .withSimpleAuth("test")
+          .build();
         this.method = method;
         this.headers = headers;
     }
