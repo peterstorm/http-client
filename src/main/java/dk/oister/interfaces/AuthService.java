@@ -8,6 +8,6 @@ public interface AuthService {
 
     public Either<HttpError, AuthToken> renewAuthToken();
 
-    public AuthToken retrieveAuthToken();
+    public Either<HttpError, AuthToken> retrieveAuthToken();
 
 }

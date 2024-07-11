@@ -19,8 +19,8 @@ public class SimpleAuthService implements AuthService {
     }
 
     @Override
-    public AuthToken retrieveAuthToken() {
-        return new AuthToken(this.apiKey);
+    public Either<HttpError, AuthToken> retrieveAuthToken() {
+        return Either.pure(new AuthToken(this.apiKey));
     }
 
 }
