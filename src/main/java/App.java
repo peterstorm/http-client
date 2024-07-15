@@ -44,7 +44,5 @@ public class App
             );
         System.out.println(result);
         System.out.println(auth);
-        Version javaVersion = Runtime.version();
-        System.out.println(javaVersion);
     }
 }
