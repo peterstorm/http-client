@@ -42,6 +42,7 @@ public class App
                 Collections.emptyMap(),
                 User.class
             );
+
         System.out.println(result);
         System.out.println(auth);
     }
