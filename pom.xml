@@ -6,7 +6,7 @@
 
   <groupId>dk.oister</groupId>
   <artifactId>http-client</artifactId>
-  <version>0.4.0</version>
+  <version>0.5.0</version>
   <distributionManagement>
     <repository>
       <id>oisterMaven</id>
