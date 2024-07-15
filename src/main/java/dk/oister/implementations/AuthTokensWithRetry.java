@@ -7,10 +7,10 @@ import dk.oister.domain.errors.RetryError;
 import dk.oister.domain.errors.Unauthorized;
 import dk.oister.interfaces.AuthService;
 import dk.oister.interfaces.AuthTokens;
-import dk.oister.interfaces.ThrowingLambda;
 import dk.oister.util.Either;
 import dk.oister.util.Left;
 import dk.oister.util.Right;
+import java.util.function.Function;
 
 public class AuthTokensWithRetry implements AuthTokens {
 
@@ -22,7 +22,7 @@ public class AuthTokensWithRetry implements AuthTokens {
 
     @Override
     public <T> Either<HttpError, T> withAuthToken(
-        ThrowingLambda<AuthToken, Either<HttpError, T>> function
+        Function<AuthToken, Either<HttpError, T>> function
     ){
         Either<HttpError, T> either = authService
                 .retrieveAuthToken()

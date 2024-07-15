@@ -4,8 +4,8 @@ import dk.oister.domain.authentication.AuthToken;
 import dk.oister.domain.errors.HttpError;
 import dk.oister.interfaces.AuthService;
 import dk.oister.interfaces.AuthTokens;
-import dk.oister.interfaces.ThrowingLambda;
 import dk.oister.util.Either;
+import java.util.function.Function;
 
 public class SimpleAuthTokens implements AuthTokens {
 
@@ -16,7 +16,7 @@ public class SimpleAuthTokens implements AuthTokens {
     }
 
     @Override
-    public <T>  Either<HttpError, T> withAuthToken(ThrowingLambda<AuthToken, Either<HttpError, T>> function) {
+    public <T>  Either<HttpError, T> withAuthToken(Function<AuthToken, Either<HttpError, T>> function) {
       return authService
         .retrieveAuthToken()
         .flatMap(token -> function .apply(token));

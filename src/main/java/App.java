@@ -17,7 +17,7 @@ public class App
         record User(int id, String username, String email) {};
         Credentials credentials = new Credentials("emilys", "emilyspass", 30);
 
-        HttpClient<Error> noAuthclient = new HttpClient
+        HttpClient<Error> authClient = new HttpClient
             .Builder<Credentials, Error>("dummyjson.com", Error.class)
             .withRetryAuth(
                 "dummyjson.com",
@@ -29,14 +29,14 @@ public class App
             .build();
 
         Either<HttpError, List<Todo>> result = 
-            noAuthclient.get(
+            authClient.get(
                 "todos",
                 Collections.emptyMap(),
                 Collections.emptyMap(),
                 Todos.class
             );
         Either<HttpError, User> auth = 
-            noAuthclient.get(
+            authClient.get(
                 "auth/me",
                 Collections.emptyMap(),
                 Collections.emptyMap(),
@@ -44,7 +44,5 @@ public class App
             );
         System.out.println(result);
         System.out.println(auth);
-        Version javaVersion = Runtime.version();
-        System.out.println(javaVersion);
     }
 }
